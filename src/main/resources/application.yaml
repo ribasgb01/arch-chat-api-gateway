@@ -1,0 +1,45 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: arch-chat-api-gateway
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOriginPatterns: "http://localhost:*"
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - PATCH
+                  - DELETE
+                  - OPTIONS
+                allowedHeaders: "*"
+                allowCredentials: true
+
+          routes:
+            - id: user-service-route
+              uri: http://localhost:8081
+              predicates:
+                - Path=/api/users/**, /api/auth/**
+
+            - id: messaging-service-http-route
+              uri: http://localhost:8082
+              predicates:
+                - Path=/api/chats/**, /api/friendships/**
+
+            - id: messaging-service-ws-route
+              uri: ws://localhost:8082
+              predicates:
+                - Path=/ws/**
+
+logging:
+  level:
+    org.springframework.cloud.gateway: TRACE
+    org.springframework.http.server.reactive: DEBUG
